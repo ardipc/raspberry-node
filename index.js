@@ -11,6 +11,7 @@ var API = "https://trackcar.herokuapp.com/api/mobil/"+IDMOBIL;
 
 var tokenAli = "e0Bm4kStuaM:APA91bEsXy3Wg_vba8ssft24cEn8ImjlnK5TX1J5sJ0l8yw-eaLdELDNNjARnlMNG5M8FXYYHtOq6BZsGt0NgSUTcJVLzIDmYmHAsERf62rm-nkTGezTMaxP5LYi80G296lCqlzq0p73";
 var tokenLina = "e7-_82nKuQI:APA91bGZmzN2S8Qaj2jD4KH_fND4XI9M2iq4zybzn2uL9_0DawwAmYqKqJS58BhPyHsDt2vTmFp8uzdektol0rjUIXQGHQ78_dqnxxsfK7IRMU-DO3cPg4AiYsLVynyr2f4TURlnwqgN";
+var tokenMun = "cfSgvFh5wr0:APA91bHIfYkparXmahmFXBHUa9Kuu0R-p9SjLwrzKHY4MeBA_bMTiG1yvuqhN_5plDZnf21haccbzgj1t_c4nT_qBeQzBqQUZZJvPjT-rER6mvIJnZOFEhf5lQsvzDiXE_A-WfrDxcDa";
 
 var LED = new Gpio(4, 'out');
 var LED17 = new Gpio(17, 'out');
@@ -126,6 +127,18 @@ sc.on('statusgps', (data) => {
  }
 });
 
+sc.on('maprealtime', (data) => {
+ if(data.msg){
+  exec('sudo systemctl start gps-realtime.service', (err, stout, sterr) => {
+   console.log('map realtime started...');
+  });
+ }else{
+  exec('sudo systemctl stop gps-realtime.service', (err, stout, sterr) => {
+   console.log('map realtime stoped...');
+  });
+ }
+});
+
 function sendMessageToDevice(idDevice, title, message) {
  request({
   url: 'https://fcm.googleapis.com/fcm/send',
@@ -165,7 +178,7 @@ LED18.watch(function(err, value){
   if(err) return console.log(err);
   console.log(body);
  });
- FCM(tokenLina, "Warning Notification", "Engine on triggered, please check your car.");
+ FCM(tokenMun, "Warning Notification", "Engine on triggered, please check your car.");
 });
 
 process.on('SIGINT', function () { //on ctrl+c
