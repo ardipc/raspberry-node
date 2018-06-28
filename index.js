@@ -1,17 +1,13 @@
 var io = require('socket.io-client');
-var sc = io.connect('https://trackcar.herokuapp.com/', {query: 'idMobil=5ab851b9b397a927081303b5'});
+var IDMOBIL = "5ab851b9b397a927081303b5";
+var API = "https://trackcar.herokuapp.com/api/mobil/"+IDMOBIL;
+var sc = io.connect('https://trackcar.herokuapp.com/', {query: 'idMobil='+IDMOBIL});
 var exec = require('child_process').exec;
 var Gpio = require('onoff').Gpio;
 var fs = require('fs');
 var async = require('async');
 
 var request = require('request');
-var IDMOBIL = "5ab851b9b397a927081303b5";
-var API = "https://trackcar.herokuapp.com/api/mobil/"+IDMOBIL;
-
-var tokenAli = "e0Bm4kStuaM:APA91bEsXy3Wg_vba8ssft24cEn8ImjlnK5TX1J5sJ0l8yw-eaLdELDNNjARnlMNG5M8FXYYHtOq6BZsGt0NgSUTcJVLzIDmYmHAsERf62rm-nkTGezTMaxP5LYi80G296lCqlzq0p73";
-var tokenLina = "e7-_82nKuQI:APA91bGZmzN2S8Qaj2jD4KH_fND4XI9M2iq4zybzn2uL9_0DawwAmYqKqJS58BhPyHsDt2vTmFp8uzdektol0rjUIXQGHQ78_dqnxxsfK7IRMU-DO3cPg4AiYsLVynyr2f4TURlnwqgN";
-var tokenMun = "cfSgvFh5wr0:APA91bHIfYkparXmahmFXBHUa9Kuu0R-p9SjLwrzKHY4MeBA_bMTiG1yvuqhN_5plDZnf21haccbzgj1t_c4nT_qBeQzBqQUZZJvPjT-rER6mvIJnZOFEhf5lQsvzDiXE_A-WfrDxcDa";
 
 var LED = new Gpio(4, 'out');
 var LED17 = new Gpio(17, 'out');
@@ -139,31 +135,6 @@ sc.on('maprealtime', (data) => {
  }
 });
 
-function sendMessageToDevice(idDevice, title, message) {
- request({
-  url: 'https://fcm.googleapis.com/fcm/send',
-  method: 'POST',
-  headers: {
-   'Content-Type': ' application/json',
-   'Authorization': 'key=AIzaSyD64VrFJwKIZi4dlRyoaMSd4bK6OQchMbA'
-  },
-  body: JSON.stringify({
-    notification: {
-    title: title,
-    body: message               
-   },
-    'to': idDevice  
-   })
-  }, function(error, response, body) {
-   if (error)
-    console.log(error);
-   else if (response.statusCode >= 400)
-    console.log("HTTP Error" + response.statusCode + "-" + response.statusCode + "\n" + body);
-   else
-    console.log(body);
- });
-}
-
 LED18.watch(function(err, value){
  console.log(value);
  var optionPut = {
@@ -174,11 +145,24 @@ LED18.watch(function(err, value){
    keterangan: "Engine Triggered, please check your car now!."
   }
  };
+
+ //save log trigered
  request.put(optionPut, function(err, resp, body){
   if(err) return console.log(err);
   console.log(body);
  });
- FCM(tokenMun, "Warning Notification", "Engine on triggered, please check your car.");
+
+ //kirim notif ke mobile apps
+ request.get(API, (err, res, body) => {
+  if (!err && res.statusCode == 200 && res != undefined) {
+   var info = JSON.parse(bod);
+   FCM(info.tokenFirebase, 
+    "Warning Notification", 
+    "Engine on triggered, please check your car."
+    );
+  }
+ });
+
 });
 
 process.on('SIGINT', function () { //on ctrl+c
