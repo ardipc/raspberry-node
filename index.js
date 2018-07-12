@@ -1,27 +1,28 @@
-var io = require('socket.io-client');
+var io      = require('socket.io-client');
 var IDMOBIL = "5ab851b9b397a927081303b5";
-var API = "https://trackcar.herokuapp.com/api/mobil/"+IDMOBIL;
-var sc = io.connect('https://trackcar.herokuapp.com/', {query: 'idMobil='+IDMOBIL});
-var exec = require('child_process').exec;
-var Gpio = require('onoff').Gpio;
-var fs = require('fs');
-var async = require('async');
+var API     = "https://trackcar.herokuapp.com/api/mobil/"+IDMOBIL;
+var sc      = io.connect('https://trackcar.herokuapp.com/', {query: 'idMobil='+IDMOBIL});
+var exec    = require('child_process').exec;
+var Gpio    = require('onoff').Gpio;
+var fs      = require('fs');
+var async   = require('async');
 
 var request = require('request');
 
-var LED = new Gpio(4, 'out');
-var LED17 = new Gpio(17, 'out');
-var LED27 = new Gpio(27, 'out');
-var LED22 = new Gpio(22, 'out');
+var LED     = new Gpio(4, 'out');
+var LED17   = new Gpio(17, 'out');
+var LED27   = new Gpio(27, 'out');
+var LED22   = new Gpio(22, 'out');
 
-var FCM = require('./sendMessage').sendMessageToDevice;
-var LED18 = new Gpio(18, 'in', 'both');
+var FCM     = require('./sendMessage').sendMessageToDevice;
+var LED18   = new Gpio(18, 'in', 'both');
 
 LED.writeSync(1);
 LED17.writeSync(1);
 LED27.writeSync(1);
 LED22.writeSync(1);
 
+/**
 request.get(API, (err, res, bod)=>{
  if (!err && res.statusCode == 200 && res != undefined) {
   var info = JSON.parse(bod);
@@ -37,6 +38,7 @@ request.get(API, (err, res, bod)=>{
   LED22.writeSync(1);
  }
 });
+*/
 
 sc.on('statuslampu', (data)=>{
  if(data.msg){
@@ -155,7 +157,7 @@ LED18.watch(function(err, value){
  //kirim notif ke mobile apps
  request.get(API, (err, res, body) => {
   if (!err && res.statusCode == 200 && res != undefined) {
-   var info = JSON.parse(bod);
+   var info = JSON.parse(body);
    FCM(info.tokenFirebase, 
     "Warning Notification", 
     "Engine on triggered, please check your car."
