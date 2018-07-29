@@ -1,0 +1,10 @@
+[Unit]
+Description=Service GPS Realtime
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /home/pi/Public/trackcar/gps-realtime.js
+
+[Install]
+WantedBy=multi-user.target

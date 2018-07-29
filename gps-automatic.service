@@ -1,0 +1,10 @@
+[Unit]
+Description=Service GPS Otomatis Engine Mati
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /home/pi/Public/trackcar/gps-automatic.js
+
+[Install]
+WantedBy=multi-user.target
